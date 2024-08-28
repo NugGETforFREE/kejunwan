@@ -1,120 +1,204 @@
 
 import os
 import subprocess
+import datetime
 from colorama import Fore, Style
 
-def print_menu():
-    print(Fore.CYAN + "\n\n1) Unpack PAK/解压缩pak文件")
-    print(Fore.YELLOW + "2) Repack PAK/打包pak文件")
-    print(Fore.MAGENTA + "3) HELP/帮助")
-    print(Fore.RED + "4) EXIT/出去" + Style.RESET_ALL)
+viod= "              "
 
-def list_files(folder_path):
-    try:
-        files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-    except Exception as e:
-        print(Fore.RED + f"\n访问文件夹时出错： {e}" + Style.RESET_ALL)
-        return []
+directories = [
+        "/storage/emulated/0/PubgMobile",
+        "/storage/emulated/0/PubgMobile/Repack",
+        "/storage/emulated/0/PubgMobile/OutPut",
+        "/storage/emulated/0/PeaceElite",
+        "/storage/emulated/0/PeaceElite/Repack",
+        "/storage/emulated/0/PeaceElite/OutPut"
+                  ]      
 
-    if not files:
-        print(Fore.RED + "\n没有可用的文件！" + Style.RESET_ALL)
-    return files
+def gradient_text(text, start_color, end_color):
+    """Creates gradient text from start_color to end_color."""
+    start_rgb = [int(start_color[i:i + 2], 16) for i in (0, 2, 4)]
+    end_rgb = [int(end_color[i:i + 2], 16) for i in (0, 2, 4)]
 
-def select_file(files, prompt):
-    if not files:
-        return None
-
-    print(Fore.GREEN + prompt + Style.RESET_ALL)
-    for index, file in enumerate(files, start=1):
-        print(Fore.WHITE + f"{index}) {file}" + Style.RESET_ALL)
-
-    print(Fore.RED + "\n0) 输出" + Style.RESET_ALL)
-
-    while True:
-        try:
-            choice = input(Fore.CYAN + "\n输入文件编号 (0 — 输出): " + Style.RESET_ALL)
-            if choice == '0':
-                return None
-            choice = int(choice)
-            if 1 <= choice <= len(files):
-                return files[choice - 1]
-            else:
-                print(Fore.RED + "\n选择错误！请重试。" + Style.RESET_ALL)
-        except ValueError:
-            print(Fore.RED + "\n输入无效！请输入一个数字。" + Style.RESET_ALL)
-
-def unpack_pak():
-    folder_path = "/storage/emulated/0/Download/for_pak/"
-    if not os.path.exists(folder_path):
-        print(Fore.RED + "\n未找到 for_pak 文件夹" + Style.RESET_ALL)
-        return
-
-    files = list_files(folder_path)
-    selected_file = select_file(files, "\n选择要解压的文件:")
-
-    if selected_file is None:
-        print(Fore.YELLOW + "\n退出 Repacker GameForPeace (@kejunwan)." + Style.RESET_ALL)
-        return
-
-    full_path = os.path.join(folder_path, selected_file)
-    command = f"qemu-i386 quickbms chinaNB.bms {full_path} /storage/emulated/0/Download/for_pak/output/"
-
-    try:
-        subprocess.run(command, shell=True, check=True)
-        print(Fore.GREEN + "\n成功" + Style.RESET_ALL)
-    except subprocess.CalledProcessError as e:
-        print(Fore.RED + f"\n执行命令时出错: {e}" + Style.RESET_ALL)
-
-def repack_pak():
-    folder_path = "/storage/emulated/0/Download/for_pak/"
-    repack_path = os.path.join("/storage/emulated/0/Download/for_pak/repack/")
-
-    if not os.path.exists(folder_path):
-        print(Fore.RED + "\n未找到 for_pak 文件夹" + Style.RESET_ALL)
-        return
-
-    files_for_pak = list_files(folder_path)
-    selected_file_for_pak = select_file(files_for_pak, "\n选择要重打包的文件:")
-
-    if selected_file_for_pak is None:
-        print(Fore.YELLOW + "\n退出 Repacker GameForPeace (@kejunwan)" + Style.RESET_ALL)
-        return
-
-    full_path_for_pak = os.path.join(folder_path, selected_file_for_pak)
+    gradient = ''
+    for i in range(len(text)):
+        ratio = i / len(text)
+        rgb = [int(start_rgb[j] + (end_rgb[j] - start_rgb[j]) * ratio) for j in range(3)]
+        gradient += f"\033[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m{text[i]}"
     
-    command = f"qemu-i386 quickbms -w -g -r -r chinaNB.bms {full_path_for_pak} /storage/emulated/0/Download/for_pak/repack/"
+    return gradient + Style.RESET_ALL
 
+def get_current_datetime():
+    """Returns the current date and time as a formatted string."""
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def print_main_menu():
+    print(viod + gradient_text("\n\n\n\n\n\n" + get_current_datetime() + " │ Telegram: @kejunwan │ Repacker • Free Tool", "0000FF", "00FFFF"))
+    print()
+    print(viod + gradient_text("┌───────────────────────────────┐", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│  PUBG Mobile  │  Peace Elite  │", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│───────────────────────────────│", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│[1] Unpack OBB │[3] Unpack PAK │", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│[2] Repack OBB │[4] Repack PAK │", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│───────────────────────────────│", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│[5] يساعد/Help/帮助/Помощь/मदद │", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│───────────────────────────────│", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│[0] مخرج/EXIT/退出/Выйти/पीछे   │", "0000FF", "00FFFF"))
+    print(viod + gradient_text("└───────────────────────────────┘", "0000FF", "00FFFF"))
+
+def print_unpack_menu():
+    print()
+def print_repack_menu():
+    print()
+
+def list_files_in_directory(directory, file_extension):
+    """Lists files in the given directory for the specified extension."""
     try:
-        subprocess.run(command, shell=True, check=True)
-        print(Fore.GREEN + "\n重打包成功" + Style.RESET_ALL)
+        if not os.path.exists(directory):
+            raise FileNotFoundError(f"目录不存在 '{directory}'")
+        
+        files = os.listdir(directory)
+        target_files = [file for file in files if file.endswith(file_extension)]
+
+        if not target_files:
+            print(gradient_text(f"在目录{directory}中未发现 {file_extension} 文件。", "FF0000", "FFFFFF"))
+            return None
+
+        print(gradient_text(f"文件 {directory}: ", "00FF00", "FFFFFF"))
+        for index, file_name in enumerate(target_files, start=1):
+            print(gradient_text(f"{index}) {file_name}", "0000FF", "00FFFF"))
+
+        return target_files
+
+    except FileNotFoundError as e:
+        print(gradient_text(str(e), "FF0000", "FFFFFF"))
+    except PermissionError:
+        print(gradient_text(f"访问目录的权限被拒绝: '{directory}.", "FF0000", "FFFFFF"))
+    except Exception as e:
+        print(gradient_text(f"访问目录出错: {e}", "FF0000", "FFFFFF"))
+
+    return None
+
+def execute_command(command):
+    """Executes the given shell command and prints the output or error."""
+    try:
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        print(gradient_text(result.stdout.strip(), "00FF00", "FFFFFF"))  # Print command output
     except subprocess.CalledProcessError as e:
-        print(Fore.RED + f"\n执行命令时出错: {e}" + Style.RESET_ALL)
-
-def help_info():
-    print(Fore.RED + "\n帮助信息：" + Style.RESET_ALL)
-    print(Fore.GREEN + "\n这是一个用于解压缩 <Game For Peace> 游戏中 pak 文件的工具\n"
-          "\n在开始使用此工具之前\n"
-          "\n1. 您需要在 \"/Download/\" 文件夹下创建一个名为 \"for_pak\" 的文件夹，在此存放 .pak 文件，以便解压\n"
-          "\n2. 在 \"for_pak\" 文件夹中创建 \"repack\" 文件夹，您将在此存储用于重新导入的文件（最常见的是 .uexp）。\n"
-          "\n3. 就是这样！工具就可以使用了。\n"
-          "Telegram：@kejunwan")
-
+        print(gradient_text(f"执行命令出错: {e}\n{e.stderr.strip()}", "FF0000", "FFFFFF"))
 
 def main():
+    subprocess.call("chmod +x quickbms", shell=True)
+
     while True:
-        print_menu()
-        choice = input(Fore.CYAN + "\n选择一个选项：" + Style.RESET_ALL)
+        print_main_menu()
+        choice = input(gradient_text("输入您的选择: ", "00FF00", "FFFFFF")).strip()
+
         if choice == '1':
-            unpack_pak()
+            while True:
+                print_unpack_menu()
+                directory = "/storage/emulated/0/pubgmobile/"
+                files = list_files_in_directory(directory, '.obb')
+                if files:
+                    index_input = input(gradient_text("Enter the file index to unpack (or 0 to go back): ", "00FF00", "FFFFFF")).strip()
+                    if index_input == '0':
+                        break
+                    if not index_input:
+                        print(gradient_text("输入内容不能为空。 请重试。", "FF0000", "FFFFFF"))
+                        continue
+                    try:
+                        index = int(index_input) - 1
+                        if 0 <= index < len(files):
+                            command = f"qemu-i386 quickbms pubgm_obb.bms {os.path.join(directory, files[index])} /storage/emulated/0/pubgmobile/OutPut/"
+                            execute_command(command)
+                        else:
+                            print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
+                    except ValueError:
+                        print(gradient_text("请输入有效的整数。", "FF0000", "FFFFFF"))
+
         elif choice == '2':
-            repack_pak()
+            while True:
+                print_repack_menu()
+                directory = "/storage/emulated/0/pubgmobile/"
+                files = list_files_in_directory(directory, '.obb')
+                if files:
+                    index_input = input(gradient_text("Enter the file index to repack (or 0 to go back): ", "00FF00", "FFFFFF")).strip()
+                    if index_input == '0':
+                        break
+                    if not index_input:
+                        print(gradient_text("输入内容不能为空。 请重试。", "FF0000", "FFFFFF"))
+                        continue
+                    try:
+                        index = int(index_input) - 1
+                        if 0 <= index < len(files):
+                            command = f"qemu-i386 quickbms -g -w -r -r pubgm_obb.bms {os.path.join(directory, files[index])} /storage/emulated/0/pubgmobile/repack/"
+                            execute_command(command)
+                        else:
+                            print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
+                    except ValueError:
+                        print(gradient_text("请输入有效的整数。", "FF0000", "FFFFFF"))
+
         elif choice == '3':
-            help_info()
+            while True:
+                print_unpack_menu()
+                directory = "/storage/emulated/0/PeaceElite/"
+                files = list_files_in_directory(directory, '.pak')
+                if files:
+                    index_input = input(gradient_text("输入要解压的文件索引（或 0 表示返回）：", "00FF00", "FFFFFF")).strip()
+                    if index_input == '0':
+                        break
+                    if not index_input:
+                        print(gradient_text("输入内容不能为空。 请重试。", "FF0000", "FFFFFF"))
+                        continue
+                    try:
+                        index = int(index_input) - 1
+                        if 0 <= index < len(files):
+                            command = f"qemu-i386 quickbms chinaNB.bms {os.path.join(directory, files[index])} /storage/emulated/0/PeaceElite/output/"
+                            execute_command(command)
+                        else:
+                            print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
+                    except ValueError:
+                        print(gradient_text("", "FF0000", "FFFFFF"))
+
         elif choice == '4':
-            print(Fore.GREEN + "\n退出程序" + Style.RESET_ALL)
+            while True:
+                print_repack_menu()
+                directory = "/storage/emulated/0/PeaceElite/"
+                files = list_files_in_directory(directory, '.pak')
+                if files:
+                    index_input = input(gradient_text("输入要重新打包的文件索引（或 0 表示返回）：", "00FF00", "FFFFFF")).strip()
+                    if index_input == '0':
+                        break
+                    if not index_input:
+                        print(gradient_text("输入内容不能为空。 请重试。", "FF0000", "FFFFFF"))
+                        continue
+                    try:
+                        index = int(index_input) - 1
+                        if 0 <= index < len(files):
+                            command = f"qemu-i386 quickbms -g -w -r -r chinaNB.bms {os.path.join(directory, files[index])} /storage/emulated/0/PeaceElite/repack/"
+                            execute_command(command)
+                        else:
+                            print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
+                    except ValueError:
+                        print(gradient_text("请输入有效的整数。", "FF0000", "FFFFFF"))
+
+        elif choice == '5':
+            print(gradient_text("\n\n\n\n\n它是一款用于解压和打包 PAK（和平精英）、解压和打包 OBB（PUBG Mobile）的工具。 \n如何开始使用\n1. 输入 9999 创建您想要的文件夹\n2. （《PUBG Mobile》）转到以下目录：/storage/emulated/0/PubgMobile/ 并将 OBB 文件拖放到此处，以便与它们进一步互动。\n3. （和平精英版）转到以下目录：/storage/emulated/0/PeaceEilte/ 并将 PAK 文件拖放到此处，以便进一步交互。\n4. 在 Repack 文件夹中拖放已修改的 .uexp 或 .dat 文件。\n5. OutPut 文件夹将包含已解压的文件。\n6. 一切准备就绪！ 工具已准备就绪\nchannel: @kejunwan\nchannel: @kejunwan\nchannel: @kejunwan\n\n\n9999) 创建文件夹（创建的文件夹将显示在控制台中)", "00FFFF", "0000FF"))
+        elif choice == '9999':
+    
+               for director in directories:
+                    try:
+                       os.makedirs(director, exist_ok=True)
+                       print(f"Directory created: {director}")
+                    except Exception as e:
+                       print(f"Error creating directory {director}: {e}")
+
+        elif choice == '0':
+            print(gradient_text("Exiting...", "FF0000", "FFFFFF"))
             break
+            
         else:
-            print(Fore.RED + "\n选择错误。 请重试。" + Style.RESET_ALL)
+            print(gradient_text("选择无效。 请重试。", "FF0000", "FFFFFF"))
 
 if __name__ == "__main__":
     main()
