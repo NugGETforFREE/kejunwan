@@ -3,18 +3,64 @@ import os
 import subprocess
 import datetime
 from colorama import Fore, Style
+import json
 
 viod= "              "
 
-directories = [
-        "/storage/emulated/0/PubgMobile",
-        "/storage/emulated/0/PubgMobile/Repack",
-        "/storage/emulated/0/PubgMobile/OutPut",
-        "/storage/emulated/0/PeaceElite",
-        "/storage/emulated/0/PeaceElite/Repack",
-        "/storage/emulated/0/PeaceElite/OutPut"
-                  ]      
+directories = []
 
+# Функция для загрузки директорий из файла
+directories = []
+
+# Файл для хранения директорий
+DIRECTORY_FILE = "directories.json"
+
+# Функция для загрузки директорий из файла
+def load_directories(file_path):
+    global directories
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            directories = json.load(file)
+    else:
+        # Настройка стандартных значений директорий
+        directories = [
+            "/storage/emulated/0/pubgmobile/",
+            "/storage/emulated/0/pubgmobile/OutPut/",
+            "/storage/emulated/0/pubgmobile/repack/",
+            "/storage/emulated/0/PeaceElite/",
+            "/storage/emulated/0/PeaceElite/output/",
+            "/storage/emulated/0/PeaceElite/repack/"
+        ]
+        save_directories(file_path)
+
+# Функция для сохранения директорий в файл
+def save_directories(file_path):
+    with open(file_path, 'w') as file:
+        json.dump(directories, file, indent=4)
+
+# Функция для редактирования директорий
+def edit_directories():
+    global directories
+    print(gradient_text("Текущие директории:", "00FF00", "FFFFFF"))
+    for index, directory in enumerate(directories, start=1):
+        print(gradient_text(f"{index}) {directory}", "00FFFF", "FFFFFF"))
+
+    try:
+        index_input = input(gradient_text("Введите номер каталога для редактирования (или 0 для выхода): ", "00FF00", "FFFFFF")).strip()
+        if index_input == '0':
+            return
+
+        index = int(index_input) - 1
+        if 0 <= index < len(directories):
+            new_directory = input(gradient_text("Введите новый путь для каталога: ", "00FF00", "FFFFFF")).strip()
+            directories[index] = new_directory
+            print(gradient_text(f"Каталог обновлён на: {new_directory}", "00FF00", "FFFFFF"))
+            save_directories(DIRECTORY_FILE)  # Сохраняем изменения в файл
+        else:
+            print(gradient_text("Неверный индекс. Пожалуйста, попробуйте еще раз.", "FF0000", "FFFFFF"))
+    except ValueError:
+        print(gradient_text("Введите правильное целое число.", "FF0000", "FFFFFF"))
+        
 def gradient_text(text, start_color, end_color):
     """Creates gradient text from start_color to end_color."""
     start_rgb = [int(start_color[i:i + 2], 16) for i in (0, 2, 4)]
@@ -30,7 +76,7 @@ def gradient_text(text, start_color, end_color):
 
 def get_current_datetime():
     """Returns the current date and time as a formatted string."""
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
 def print_main_menu():
     print(viod + gradient_text("\n\n\n\n\n\n" + get_current_datetime() + " │ Telegram: @kejunwan │ Repacker • Free Tool", "0000FF", "00FFFF"))
@@ -42,6 +88,8 @@ def print_main_menu():
     print(viod + gradient_text("│[2] Repack OBB │[4] Repack PAK │", "0000FF", "00FFFF"))
     print(viod + gradient_text("│───────────────────────────────│", "0000FF", "00FFFF"))
     print(viod + gradient_text("│[5] يساعد/Help/帮助/Помощь/मदद │", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│───────────────────────────────│", "0000FF", "00FFFF"))
+    print(viod + gradient_text("│[6] Settings/Настройки/设置    │", "0000FF", "00FFFF"))
     print(viod + gradient_text("│───────────────────────────────│", "0000FF", "00FFFF"))
     print(viod + gradient_text("│[0] مخرج/EXIT/退出/Выйти/पीछे   │", "0000FF", "00FFFF"))
     print(viod + gradient_text("└───────────────────────────────┘", "0000FF", "00FFFF"))
@@ -88,6 +136,9 @@ def execute_command(command):
         print(gradient_text(f"执行命令出错: {e}\n{e.stderr.strip()}", "FF0000", "FFFFFF"))
 
 def main():
+    global directories
+    load_directories(DIRECTORY_FILE)  # Загружаем директории при запуске
+   
     subprocess.call("chmod +x quickbms", shell=True)
 
     while True:
@@ -95,9 +146,9 @@ def main():
         choice = input(gradient_text("输入您的选择: ", "00FF00", "FFFFFF")).strip()
 
         if choice == '1':
-            while True:
+            
                 print_unpack_menu()
-                directory = "/storage/emulated/0/pubgmobile/"
+                directory = directories[0]
                 files = list_files_in_directory(directory, '.obb')
                 if files:
                     index_input = input(gradient_text("Enter the file index to unpack (or 0 to go back): ", "00FF00", "FFFFFF")).strip()
@@ -109,7 +160,7 @@ def main():
                     try:
                         index = int(index_input) - 1
                         if 0 <= index < len(files):
-                            command = f"qemu-i386 quickbms pubgm_obb.bms {os.path.join(directory, files[index])} /storage/emulated/0/pubgmobile/OutPut/"
+                            command = f"qemu-i386 quickbms pubgm_obb.bms {os.path.join(directory, files[index])} {directory[1]}"
                             execute_command(command)
                         else:
                             print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
@@ -117,9 +168,9 @@ def main():
                         print(gradient_text("请输入有效的整数。", "FF0000", "FFFFFF"))
 
         elif choice == '2':
-            while True:
+            
                 print_repack_menu()
-                directory = "/storage/emulated/0/pubgmobile/"
+                directory = directories[0]
                 files = list_files_in_directory(directory, '.obb')
                 if files:
                     index_input = input(gradient_text("Enter the file index to repack (or 0 to go back): ", "00FF00", "FFFFFF")).strip()
@@ -131,7 +182,7 @@ def main():
                     try:
                         index = int(index_input) - 1
                         if 0 <= index < len(files):
-                            command = f"qemu-i386 quickbms -g -w -r -r pubgm_obb.bms {os.path.join(directory, files[index])} /storage/emulated/0/pubgmobile/repack/"
+                            command = f"qemu-i386 quickbms -g -w -r -r pubgm_obb.bms {os.path.join(directory, files[index])} {directory[2]}"
                             execute_command(command)
                         else:
                             print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
@@ -139,9 +190,8 @@ def main():
                         print(gradient_text("请输入有效的整数。", "FF0000", "FFFFFF"))
 
         elif choice == '3':
-            while True:
                 print_unpack_menu()
-                directory = "/storage/emulated/0/PeaceElite/"
+                directory = directories[3]
                 files = list_files_in_directory(directory, '.pak')
                 if files:
                     index_input = input(gradient_text("输入要解压的文件索引（或 0 表示返回）：", "00FF00", "FFFFFF")).strip()
@@ -153,7 +203,7 @@ def main():
                     try:
                         index = int(index_input) - 1
                         if 0 <= index < len(files):
-                            command = f"qemu-i386 quickbms chinaNB.bms {os.path.join(directory, files[index])} /storage/emulated/0/PeaceElite/output/"
+                            command = f"qemu-i386 quickbms chinaNB.bms {os.path.join(directory, files[index])} {directories[4]}"
                             execute_command(command)
                         else:
                             print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
@@ -161,9 +211,9 @@ def main():
                         print(gradient_text("", "FF0000", "FFFFFF"))
 
         elif choice == '4':
-            while True:
+            
                 print_repack_menu()
-                directory = "/storage/emulated/0/PeaceElite/"
+                directory = directories[3]
                 files = list_files_in_directory(directory, '.pak')
                 if files:
                     index_input = input(gradient_text("输入要重新打包的文件索引（或 0 表示返回）：", "00FF00", "FFFFFF")).strip()
@@ -175,7 +225,7 @@ def main():
                     try:
                         index = int(index_input) - 1
                         if 0 <= index < len(files):
-                            command = f"qemu-i386 quickbms -g -w -r -r chinaNB.bms {os.path.join(directory, files[index])} /storage/emulated/0/PeaceElite/repack/"
+                            command = f"qemu-i386 quickbms -g -w -r -r chinaNB.bms {os.path.join(directory, files[index])} {directories[5]}"
                             execute_command(command)
                         else:
                             print(gradient_text("索引无效。 请重试。", "FF0000", "FFFFFF"))
@@ -192,6 +242,8 @@ def main():
                        print(f"Directory created: {director}")
                     except Exception as e:
                        print(f"Error creating directory {director}: {e}")
+        elif choice == '6':
+            edit_directories()
 
         elif choice == '0':
             print(gradient_text("Exiting...", "FF0000", "FFFFFF"))
